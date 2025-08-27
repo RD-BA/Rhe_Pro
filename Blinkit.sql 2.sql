@@ -1,5 +1,6 @@
 use Blinkitdb
 select * from BlinkIT_data
+
 select distinct item_fat_content from BlinkIT_data
 
 update BlinkIT_data
@@ -22,6 +23,7 @@ group by item_fat_content
 ---What is the Total Sales as per the item type
 select item_type, Round(sum(Total_Sales),2) as total_sales from BlinkIT_data
 group by item_type
+order by total_sales desc
 -- Outlet with Max Sales
 
 SELECT 
@@ -108,10 +110,8 @@ where rk <= 3
 Order by Item_Type, Outlet_Type, Totalsales
 
 ---Cumulative sales 
-Select * from BlinkIT_data
-where Item_Weight is NULL
 Select Outlet_Type, Item_Type, Outlet_establishment_Year,Total_Sales,
-Sum(Total_sales) over (order by Outlet_Type, Item_Type, Outlet_establishment_Year, Total_Sales) as Totalsales
+Sum(Total_sales) over (order by Outlet_Type, Item_Type, Outlet_establishment_Year desc, Total_Sales) as Totalsales
 from BlinkIT_data
 
 ---Cumulative sales of each Outlet, Item Type and Establishment Year
@@ -119,7 +119,7 @@ Select Outlet_Type, Item_Type, Outlet_establishment_Year,Total_Sales,
 Sum(Total_sales) 
 over (
 partition by Outlet_Type, Item_Type, Outlet_establishment_Year 
-order by Outlet_Type, Item_Type, Outlet_establishment_Year, Total_Sales   ) as Totalsales
+order by Outlet_Type, Item_Type, Outlet_establishment_Year, Total_Sales desc) as Totalsales
 from BlinkIT_data
 
 ---Replace Nulls with coalesce
@@ -133,15 +133,14 @@ from BlinkIT_data
 Group by Outlet_Identifier
 Order by Sum(Rating) desc
 
-Select * from BlinkIT_data
 
 Select Outlet_Identifier,Outlet_Size, Outlet_Establishment_Year, Sum(Rating) as Ranki
 from BlinkIT_data
 Group by Outlet_Identifier,Outlet_Size,Outlet_Establishment_Year
 Order by Outlet_Establishment_Year,Sum(Rating) desc
 
-Select Outlet_Identifier,Outlet_Size, Rating,
+---Lowest Ranked
+Select Outlet_Identifier,Outlet_Size,
 Sum(Rating) over(Partition by Outlet_Identifier,Outlet_Size
 order by Outlet_Identifier,Outlet_Size,rating) as Ranki
 from BlinkIT_data
-Group by Outlet_Identifier,Outlet_Size
